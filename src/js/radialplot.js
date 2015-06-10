@@ -184,6 +184,18 @@ ui.d3.RadialPlot.prototype.setFreeDraw = function(freeDraw) {
   return this;
 };
 
+/**
+ * Set the apply function that is run after the data has been modified
+ * by this graph (e.g. after the user finished dragging a data point around)
+ * 
+ * @param {Function} applyFn
+ */
+ui.d3.RadialPlot.prototype.setApplyFunction = function(applyFn) {
+  this._applyFn = applyFn || function() {};
+
+  return this;
+};
+
 
 /**
  * When any underlying change to the data is made this method should be called
@@ -534,10 +546,8 @@ ui.d3.RadialPlot.prototype._getDragBehaviour = function(scope) {
           break;
         }
       }
-      
-      scope.$apply(function() {
-         scope.dsn = scope.dsn;
-      });
+
+      that._applyFn(scope.dsn);
 
       sum = 0;
       values = that._map(scope.dsn,function(row) {
@@ -603,9 +613,8 @@ ui.d3.RadialPlot.prototype._addSceneTransitions = function(scenes, area, points)
 /**
  * Create directive in namespace
  */
-ui.radialplot = function() {
-  function link(scope, element, attrs) {
-    var radialPlot = new ui.d3.RadialPlot(element[0])
+ui.radialplot = function(element, attrs) {
+    return new ui.d3.RadialPlot(element)
         .setPlotRadius(ui.d3.RadialPlot.toInteger(attrs.plotRadius))
         .setInnerRadius(ui.d3.RadialPlot.toInteger(attrs.innerRadius))
         .setPadding(ui.d3.RadialPlot.toInteger(attrs.padding))
@@ -619,27 +628,34 @@ ui.radialplot = function() {
         .setAnimateEasing(attrs.animateEasing)
         .setAnimationTimes(ui.d3.RadialPlot.toInteger(attrs.animateDuration), ui.d3.RadialPlot.toInteger(attrs.delayDuration))
         .setScaleType(attrs.scale)
-        .setFreeDraw((attrs.free === 'true'));
-
-    // Watch statement that triggers redraw of content. 
-    scope.$watch('dsn', function(dsn) {
-      radialPlot.onDataChanged(dsn, scope.compare, scope.play, scope);
-    }.bind(this), true);
-  }
-
-  return {
-    restrict: 'E',
-    scope: {
-      dsn: '=',
-      compare: '=',
-      play: '='
-    },
-    link: link
-  };
+        .setFreeDraw((attrs.free === 'true'))
+        .setApplyFunction(attrs.applyFunction ? attrs.applyFunction : function() {});
 };
 
 /**
- * Expose directive
+ * Expose directive for AngularJS
  */
-angular.module('ui.radialplot', [])
-  .directive('radialPlot', ui.radialplot);
+if (window['angular']) {
+  angular.module('ui.radialplot', []).directive('radialPlot', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        dsn: '=',
+        compare: '=',
+        play: '='
+      },
+      link: function(scope, element, attrs) {
+        attrs.applyFunction = attrs.applyFunction || function(newData) {
+          scope.$apply(function() {
+            scope.dsn = scope.dsn;
+          });
+        };
+        var radialPlot = ui.radialplot(element[0], attrs);
+        // Watch statement that triggers redraw of content.
+        scope.$watch('dsn', function(dsn) {
+          radialPlot.onDataChanged(dsn, scope.compare, scope.play, scope);
+        }.bind(this), true);
+      }
+    };
+  });
+}
