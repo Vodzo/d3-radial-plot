@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>VanillaJS - Radial Plot</title>
+    <base href=".."></base>
+    <link rel="stylesheet" href="css/radialplot.css" type="text/css" />
+</head>
+<body ng-controller="radialPlotCtrl">
+    <h1>VanillaJS Radial Plot</h1>
+    <div class="plot">
+        <h3>Animated</h3>
+        <div class="half-plot">
+            <div id="animated1"></div>
+        </div>
+        <div class="half-plot">
+            <div id="animated2"></div>
+        </div>
+    </div>
+    <div class="plot">
+        <h3>Basic</h3>
+        <div id="basic"></div>
+    </div>
+    <div class="plot">
+        <h3>Comparison</h3>
+        <div id="comparison"></div>
+    </div>
+    <div class="plot">
+        <h3>Editable</h3>
+        <div id="editable"></div>
+    </div>
+    <div class="plot">
+        <h3>Logarithmic Scale</h3>
+        <div id="logarithmic"></div>
+    </div>
+
+    <script type="text/javascript" src="bower_components/d3/d3.min.js"></script>
+    <script type="text/javascript" src="js/radialplot.js"></script>
+    <script>
+        var dataset_a =  [ 
+            { id: 0, name: "Analysing", value: 30 },
+            { id: 1, name: "Designing", value: 50 },
+            { id: 2, name: "Implementing", value: 20 },
+            { id: 3, name: "Testing", value: 15 },
+            { id: 4, name: "Reviewing", value: 55 },
+            { id: 5, name: "Deploying", value: 85 }
+        ];
+
+        var dataset_b =  [ 
+            { id: 0, name: "Analysing", value: 20 },
+            { id: 1, name: "Designing", value: 40 },
+            { id: 2, name: "Implementing", value: 20 },
+            { id: 3, name: "Testing", value: 25 },
+            { id: 4, name: "Reviewing", value: 50 },
+            { id: 5, name: "Deploying", value: 80 }
+        ];
+
+        var others =  [
+            [ 
+                { id: 0, name: "Analysing", value: 5 },
+                { id: 1, name: "Designing", value: 10 },
+                { id: 2, name: "Implementing", value: 20 },
+                { id: 3, name: "Testing", value: 15 },
+                { id: 4, name: "Reviewing", value: 20 },
+                { id: 5, name: "Deploying", value: 10 }
+            ],
+            [ 
+                { id: 0, name: "Analysing", value: 10 },
+                { id: 1, name: "Designing", value: 70 },
+                { id: 2, name: "Implementing", value: 10 },
+                { id: 3, name: "Testing", value: 35 },
+                { id: 4, name: "Reviewing", value: 50 },
+                { id: 5, name: "Deploying", value: 60 }
+            ],
+            [ 
+                { id: 0, name: "Analysing", value: 20 },
+                { id: 1, name: "Designing", value: 40 },
+                { id: 2, name: "Implementing", value: 20 },
+                { id: 3, name: "Testing", value: 25 },
+                { id: 4, name: "Reviewing", value: 50 },
+                { id: 5, name: "Deploying", value: 80 }
+            ],
+            [ 
+                { id: 0, name: "Analysing", value: 25 },
+                { id: 1, name: "Designing", value: 30 },
+                { id: 2, name: "Implementing", value: 20 },
+                { id: 3, name: "Testing", value: 45 },
+                { id: 4, name: "Reviewing", value: 25 },
+                { id: 5, name: "Deploying", value: 80 }
+            ]
+        ];
+
+        window.onload = function() {
+            var animated1Element = document.getElementById('animated1');
+            var scope = { 'dsn': dataset_a, 'play': others }; // play datasets at the beginning (must a nested array), use 'compare': dataset_b to compare to another dataset (readonly, behind the data source)
+            var attrs = { 'point-radius': 1.2, 'scale': 'log', 'editable': 'true', 'labelled': 'true', 'free': 'true', 'animate': 'true', 'rounded': 'true' };
+            //attrs['applyFunction'] = function(newData) { console.log(newData); };
+            var radialPlotAnimated1 = ui.radialplot(animated1Element, attrs);
+            radialPlotAnimated1.onDataChanged(dataset_a, scope.compare, scope.play, scope);
+
+            var animated2Element = document.getElementById('animated2');
+            var scope2 = { 'dsn': dataset_a, 'play': others };
+            var radialPlotAnimated2 = ui.radialplot(animated2Element, { 'point-radius': 1.2, 'editable': 'true', 'labelled': 'true', 'free': 'true', 'animate': 'true', 'rounded': 'true' });
+            radialPlotAnimated2.onDataChanged(dataset_a, scope2.compare, scope2.play, scope2);
+
+            var basicElement = document.getElementById('basic');
+            var scopeBasic = { 'dsn': dataset_a };
+            var radialPlotBasic = ui.radialplot(basicElement, { 'point-radius': 1.2, 'labelled': 'true', 'free': 'true', 'interpolation': 'cardinal-closed' });
+            radialPlotBasic.onDataChanged(dataset_a, scopeBasic.compare, scopeBasic.play, scopeBasic);
+
+            var comparisonElement = document.getElementById('comparison');
+            var scopeComparison = { 'dsn': dataset_a, 'compare': dataset_b };
+            var radialPlotComparison = ui.radialplot(comparisonElement, { 'point-radius': 1.2, 'labelled': 'true', 'free': 'true', 'interpolation': 'cardinal-closed' });
+            radialPlotComparison.onDataChanged(dataset_a, scopeComparison.compare, scopeComparison.play, scopeComparison);
+
+            var editableElement = document.getElementById('editable');
+            var scopeEditable = { 'dsn': dataset_a };
+            var radialPlotEditable = ui.radialplot(editableElement, { 'point-radius': 1.2, 'editable': 'true', 'labelled': 'true', 'free': 'true', 'interpolation': 'cardinal-closed' });
+            radialPlotEditable.onDataChanged(dataset_a, scopeEditable.compare, scopeEditable.play, scopeEditable);
+
+            var logarithmicElement = document.getElementById('logarithmic');
+            var scopeLogarithmic = { 'dsn': dataset_a };
+            var radialPlotLogarithmic = ui.radialplot(logarithmicElement, { 'point-radius': 1.2, 'scale': 'log', 'editable': 'true', 'labelled': 'true', 'free': 'true', 'interpolation': 'cardinal-closed' });
+            radialPlotLogarithmic.onDataChanged(dataset_a, scopeLogarithmic.compare, scopeLogarithmic.play, scopeLogarithmic);
+        };
+    </script>
+</body>
+</html>
