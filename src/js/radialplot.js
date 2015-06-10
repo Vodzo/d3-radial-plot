@@ -249,7 +249,6 @@ ui.d3.RadialPlot.prototype.onDataChanged = function(dsn, compare, scenes, scope)
   }
 
   if (this._editable) {
-    console.log('is Editable');
     var drag = this._getDragBehaviour(scope);
     this.points.call(drag);
   }
@@ -271,7 +270,6 @@ ui.d3.RadialPlot.prototype.onDataChanged = function(dsn, compare, scenes, scope)
 ui.d3.RadialPlot.toInteger = function(x) {
   var y = parseInt(x, 10);
   if (isNaN(y)) {
-    console.log(x + ' could not be converted to an integer.');
     return 0;
   }
   return y;
@@ -280,7 +278,6 @@ ui.d3.RadialPlot.toInteger = function(x) {
 ui.d3.RadialPlot.toFloat = function(x, precision) {
   var y = parseFloat(x);
   if (isNaN(y)) {
-    console.log(x + ' could not be converted to a float.');
     y = 0.0;
   }
   return y.toFixed(precision);
